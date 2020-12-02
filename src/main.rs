@@ -66,8 +66,7 @@ fn make_map(player: &mut Object) -> Map {
 
         let new_room = Rect::new(x, y, w, h);
 
-        let failed = rooms
-            .iter()
+        let failed = rooms.iter()
             .any(|other_room| new_room.intersects_with(other_room));
 
         if !failed {
@@ -78,7 +77,17 @@ fn make_map(player: &mut Object) -> Map {
             if rooms.is_empty() {
                 player.x = new_x;
                 player.y = new_y;
-            }
+            } else {
+				let (prev_x, prev_y) = rooms[rooms.len() -1].center();
+				if rand::random() {
+					create_h_tunnel(prev_x, new_x, prev_y, &mut map);
+					create_v_tunnel(prev_y, new_y, new_x, &mut map);
+				} else {
+					create_v_tunnel(prev_y, new_y, prev_x, &mut map);
+					create_h_tunnel(prev_x, new_x, new_y, &mut map);
+				}
+			}
+			rooms.push(new_room);
         }
     }
 
@@ -212,13 +221,13 @@ fn create_room(room: &Rect, map: &mut Map) {
     }
 }
 
-fn create_h_tunel(x1: i32, x2: i32, y: i32, map: &mut Map) {
+fn create_h_tunnel(x1: i32, x2: i32, y: i32, map: &mut Map) {
     for x in cmp::min(x1, x2)..(cmp::max(x1, x2) + 1) {
         map[x as usize][y as usize] = Tile::empty();
     }
 }
 
-fn create_v_tunel(y1: i32, y2: i32, x: i32, map: &mut Map) {
+fn create_v_tunnel(y1: i32, y2: i32, x: i32, map: &mut Map) {
     for y in cmp::min(y1, y2)..(cmp::max(y1, y2) + 1) {
         map[x as usize][y as usize] = Tile::empty();
     }
@@ -269,6 +278,14 @@ fn main() {
 }
 
 #[test]
-fn usize_max() {
-    println!("{}", usize::MAX);
+fn rec_int(){
+	let r1 = Rect::new(1, 1, 10, 10);
+	let r2 = Rect::new(2, 2, 10, 10);
+	assert!(r1.intersects_with(r2));
+
+
+	let r1 = Rect::new(1, 1, 10, 10);
+	let r2 = Rect::new(11, 2, 10, 10);
+	assert!(!r1.intersects_with(r2));
+
 }
